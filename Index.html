@@ -1,0 +1,628 @@
+<<!DOCTYPE html>
+
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katak Pintar Berhitung - Game Pembelajaran Matematika AI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Bubblegum Sans for playful educational feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-playful {
+            font-family: 'Bubblegum Sans', cursive;
+        }
+        
+        /* Premium custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+
+        /* Water wave animation for pond background */
+        @keyframes water-wave {
+            0% { transform: translateY(0) scaleY(1); }
+            50% { transform: translateY(6px) scaleY(1.03); }
+            100% { transform: translateY(0) scaleY(1); }
+        }
+        .water-bg {
+            animation: water-wave 8s ease-in-out infinite;
+        }
+
+        /* Floating motion for Lily Pads */
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .lily-pad-float {
+            animation: floating 5s ease-in-out infinite;
+        }
+        .lily-pad-float:nth-child(2) { animation-delay: 1.2s; }
+        .lily-pad-float:nth-child(3) { animation-delay: 2.4s; }
+        .lily-pad-float:nth-child(4) { animation-delay: 3.6s; }
+
+        /* Clouds drifting */
+        @keyframes drift {
+            0% { transform: translateX(-20%); }
+            100% { transform: translateX(120%); }
+        }
+        .cloud-drift-slow {
+            animation: drift 65s linear infinite;
+        }
+        .cloud-drift-fast {
+            animation: drift 40s linear infinite;
+        }
+
+        /* Dragonfly animation path */
+        @keyframes insect-fly {
+            0% { transform: translate(0, 0) scaleX(1); }
+            45% { transform: translate(300px, -60px) scaleX(1); }
+            50% { transform: translate(300px, -60px) scaleX(-1); }
+            95% { transform: translate(0, 15px) scaleX(-1); }
+            100% { transform: translate(0, 0) scaleX(1); }
+        }
+        .dragonfly-anim {
+            animation: insect-fly 18s ease-in-out infinite;
+        }
+
+        /* Butterfly animation path */
+        @keyframes butterfly-fly {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            30% { transform: translate(140px, -90px) rotate(20deg); }
+            60% { transform: translate(-50px, -160px) rotate(-15deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .butterfly-anim {
+            animation: butterfly-fly 22s ease-in-out infinite;
+        }
+
+        /* Ripple effect */
+        @keyframes ripple-effect {
+            0% { transform: scale(0.2); opacity: 1; border-width: 5px; }
+            100% { transform: scale(2.5); opacity: 0; border-width: 1px; }
+        }
+        .ripple {
+            position: absolute;
+            border: 4px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: ripple-effect 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            pointer-events: none;
+        }
+
+        /* Custom Squash and Stretch Frog Idle Animation */
+        @keyframes frog-idle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08, 0.92); }
+        }
+        .frog-idle-anim {
+            animation: frog-idle 2.2s ease-in-out infinite;
+        }
+
+        /* Custom shake animation for wrong leaf answers */
+        @keyframes leaf-shake {
+            0%, 100% { transform: rotate(0deg); }
+            20%, 60% { transform: rotate(-10deg); }
+            40%, 80% { transform: rotate(10deg); }
+        }
+        .leaf-shake-anim {
+            animation: leaf-shake 0.6s ease-in-out;
+        }
+
+        /* Confetti effect styling */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Pseudo-fullscreen fallback styles when Permissions Policy blocks Native Fullscreen */
+        .pseudo-fullscreen-active {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            z-index: 99999 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-sky-950 via-teal-950 to-emerald-950 min-h-screen flex flex-col items-center justify-center p-1 sm:p-4">
+
+    <!-- Main Game Wrapper -->
+    <div id="game-container" class="relative w-full max-w-5xl bg-slate-900/95 rounded-3xl overflow-hidden shadow-2xl border-4 border-emerald-500 flex flex-col" style="aspect-ratio: 16/10; min-height: 600px;">
+        
+        <!-- HEADER HUD -->
+        <header class="flex items-center justify-between px-6 py-3 bg-slate-950/80 border-b border-emerald-800 z-20">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl filter drop-shadow">🐸</span>
+                <div>
+                    <h1 class="font-playful text-2xl text-emerald-400 tracking-wide">Katak Pintar Berhitung <span class="text-xs bg-emerald-600/50 text-emerald-200 px-2 py-0.5 rounded-full">AI Edition</span></h1>
+                    <p class="text-xs text-slate-400">Belajar Perkalian & Pembagian dengan Asisten AI</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- AI API Config button -->
+                <button id="btn-ai-settings" class="p-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-yellow-400 rounded-xl transition duration-150" title="Pengaturan API Gemini AI">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+                <!-- Fullscreen button -->
+                <button id="btn-fullscreen" class="p-2 bg-emerald-800 hover:bg-emerald-700 active:scale-95 text-white rounded-xl transition duration-150" aria-label="Layar Penuh">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                </button>
+                <!-- Sound control button -->
+                <button id="btn-sound" class="p-2 bg-emerald-800 hover:bg-emerald-700 active:scale-95 text-white rounded-xl transition duration-150 flex items-center space-x-1" aria-label="Pengaturan Suara">
+                    <span id="sound-icon" class="text-lg">🔊</span>
+                </button>
+                <!-- Pause button (Only visible in-game) -->
+                <button id="btn-pause" class="hidden px-4 py-2 bg-yellow-600 hover:bg-yellow-500 active:scale-95 text-white font-bold rounded-xl transition duration-150 text-sm" aria-label="Jeda Permainan">
+                    JEDA
+                </button>
+            </div>
+        </header>
+
+        <!-- SCREENS MANAGER -->
+        <div class="relative flex-1 w-full overflow-hidden flex flex-col md:flex-row">
+            
+            <!-- GAMEPLAY SCREEN -->
+            <main id="screen-game" class="hidden flex-1 relative flex flex-col overflow-hidden">
+                <!-- Water and background scenery container -->
+                <div class="absolute inset-0 bg-gradient-to-b from-sky-400 via-sky-300 to-teal-500 overflow-hidden select-none pointer-events-none">
+                    <!-- Dynamic Clouds -->
+                    <div class="absolute top-4 left-0 w-24 h-12 bg-white/75 rounded-full filter blur-sm cloud-drift-slow"></div>
+                    <div class="absolute top-12 left-0 w-36 h-16 bg-white/60 rounded-full filter blur-sm cloud-drift-fast" style="animation-delay: -10s;"></div>
+                    <div class="absolute top-6 right-10 w-28 h-12 bg-white/70 rounded-full filter blur-sm cloud-drift-slow" style="animation-delay: -25s;"></div>
+
+                    <!-- Scenery (Back forest representation using SVG) -->
+                    <svg class="absolute bottom-[40%] w-full h-24 text-teal-800/40" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                        <path d="M0 80 Q100 20 200 80 T400 80 T600 80 T800 80 T1000 80 L1000 100 L0 100 Z" fill="currentColor"></path>
+                    </svg>
+                    <svg class="absolute bottom-[33%] w-full h-28 text-emerald-900/40" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                        <path d="M0 90 Q150 40 300 90 T600 90 T900 90 T1000 90 L1000 100 L0 100 Z" fill="currentColor"></path>
+                    </svg>
+
+                    <!-- Beautiful Pond Water Bed -->
+                    <div class="absolute bottom-0 left-0 right-0 h-[68%] bg-gradient-to-b from-teal-400 via-teal-600 to-emerald-800 water-bg"></div>
+                    
+                    <!-- Decorative swimming fish -->
+                    <div class="absolute bottom-24 left-10 opacity-30 animate-pulse text-orange-400 text-2xl">🐟</div>
+                    <div class="absolute bottom-16 right-24 opacity-25 animate-pulse text-orange-300 text-2xl" style="animation-delay: 2.5s;">🐟</div>
+
+                    <!-- Decorative Insects floating -->
+                    <div class="absolute top-1/2 left-12 dragonfly-anim z-10 text-2xl pointer-events-none select-none">🛸</div>
+                    <div class="absolute top-[45%] right-16 butterfly-anim z-10 text-2xl pointer-events-none select-none">🦋</div>
+                </div>
+
+                <!-- Particle canvas layer -->
+                <canvas id="particle-canvas" class="absolute inset-0 pointer-events-none z-10"></canvas>
+
+                <!-- GAMEPLAY INTERACTIVE AREA -->
+                <div class="relative flex-1 flex flex-col justify-between p-4 z-10">
+                    
+                    <!-- Question Display -->
+                    <div class="w-full max-w-xl mx-auto bg-white/95 text-slate-900 rounded-2xl shadow-2xl p-4 border-4 border-yellow-400 text-center relative mt-2 transition-transform duration-300 transform scale-100" id="question-box">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-slate-950 font-bold px-5 py-1 rounded-full text-xs uppercase tracking-wider shadow-lg">
+                            <span id="lbl-game-mode-tag">MATEMATIKA</span> <span id="lbl-progress-game">1 / 20</span>
+                        </div>
+                        
+                        <!-- AI Loading indicator for Story Mode -->
+                        <div id="ai-loading-indicator" class="hidden flex-col items-center justify-center p-4">
+                            <div class="animate-spin rounded-full h-8 w-8 border-4 border-emerald-500 border-t-transparent mb-2"></div>
+                            <p class="text-xs text-slate-500 font-semibold">Guru Katak AI sedang merangkai cerita seru...</p>
+                        </div>
+
+                        <div id="math-question-content">
+                            <h2 id="lbl-question-intro" class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Berapakah hasil dari:</h2>
+                            <p id="lbl-question-story" class="text-sm text-slate-700 px-3 py-1 font-semibold leading-relaxed hidden bg-emerald-50 rounded-xl my-2 border border-emerald-100 italic"></p>
+                            <div id="math-expression" class="font-playful text-4xl md:text-5xl text-emerald-700 my-2 tracking-wide font-black drop-shadow-sm">
+                                8 × 7 = ?
+                            </div>
+                        </div>
+
+                        <!-- Micro Timer bar inside question box -->
+                        <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden mt-3 shadow-inner">
+                            <div id="timer-progress" class="bg-gradient-to-r from-emerald-500 to-red-500 h-full transition-all duration-100 ease-linear" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- The Pond Area: where Lily Pads and Frog live -->
+                    <div id="pond-play-area" class="relative flex-1 w-full my-4 min-h-[260px]">
+                        
+                        <!-- 4 Lily Pads (Answer Options) arranged in a responsive, beautiful arch -->
+                        <div class="absolute w-full top-4 flex justify-around px-2 sm:px-6 z-10">
+                            
+                            <!-- Pad 1 -->
+                            <div id="pad-0" class="lily-pad-float flex flex-col items-center cursor-pointer group transition-all duration-200 hover:scale-110 active:scale-90" style="width: 22%; max-width: 125px;">
+                                <div class="relative w-full aspect-square">
+                                    <!-- Leaf SVG -->
+                                    <svg class="w-full h-full text-emerald-500 filter drop-shadow-lg group-hover:text-emerald-400 transition" viewBox="0 0 100 100">
+                                        <path d="M50 10 C 20 10, 10 30, 10 50 C 10 70, 30 90, 50 90 C 70 90, 90 70, 90 50 C 90 30, 80 15, 60 12 C 55 11, 52 14, 50 10 Z" fill="currentColor"></path>
+                                        <!-- Flower details on leaf -->
+                                        <circle cx="50" cy="50" r="38" fill="none" stroke="#047857" stroke-width="3" stroke-dasharray="4,6"></circle>
+                                    </svg>
+                                    <!-- Pink Lotus Flower on side -->
+                                    <span class="absolute -top-1 -right-1 text-2xl filter drop-shadow">🌸</span>
+                                    <!-- Option Text -->
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span id="opt-0" class="font-playful text-3xl sm:text-4xl text-white font-black drop-shadow-[0_3px_3px_rgba(0,0,0,0.9)]">56</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pad 2 -->
+                            <div id="pad-1" class="lily-pad-float flex flex-col items-center cursor-pointer group transition-all duration-200 hover:scale-110 active:scale-90" style="width: 22%; max-width: 125px;">
+                                <div class="relative w-full aspect-square">
+                                    <svg class="w-full h-full text-emerald-500 filter drop-shadow-lg group-hover:text-emerald-400 transition" viewBox="0 0 100 100">
+                                        <path d="M50 10 C 20 10, 10 30, 10 50 C 10 70, 30 90, 50 90 C 70 90, 90 70, 90 50 C 90 30, 80 15, 60 12 C 55 11, 52 14, 50 10 Z" fill="currentColor"></path>
+                                        <circle cx="50" cy="50" r="38" fill="none" stroke="#047857" stroke-width="3" stroke-dasharray="4,6"></circle>
+                                    </svg>
+                                    <span class="absolute -top-1 -right-1 text-2xl filter drop-shadow">🌸</span>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span id="opt-1" class="font-playful text-3xl sm:text-4xl text-white font-black drop-shadow-[0_3px_3px_rgba(0,0,0,0.9)]">48</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pad 3 -->
+                            <div id="pad-2" class="lily-pad-float flex flex-col items-center cursor-pointer group transition-all duration-200 hover:scale-110 active:scale-90" style="width: 22%; max-width: 125px;">
+                                <div class="relative w-full aspect-square">
+                                    <svg class="w-full h-full text-emerald-500 filter drop-shadow-lg group-hover:text-emerald-400 transition" viewBox="0 0 100 100">
+                                        <path d="M50 10 C 20 10, 10 30, 10 50 C 10 70, 30 90, 50 90 C 70 90, 90 70, 90 50 C 90 30, 80 15, 60 12 C 55 11, 52 14, 50 10 Z" fill="currentColor"></path>
+                                        <circle cx="50" cy="50" r="38" fill="none" stroke="#047857" stroke-width="3" stroke-dasharray="4,6"></circle>
+                                    </svg>
+                                    <span class="absolute -top-1 -right-1 text-2xl filter drop-shadow">🌸</span>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span id="opt-2" class="font-playful text-3xl sm:text-4xl text-white font-black drop-shadow-[0_3px_3px_rgba(0,0,0,0.9)]">64</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pad 4 -->
+                            <div id="pad-3" class="lily-pad-float flex flex-col items-center cursor-pointer group transition-all duration-200 hover:scale-110 active:scale-90" style="width: 22%; max-width: 125px;">
+                                <div class="relative w-full aspect-square">
+                                    <svg class="w-full h-full text-emerald-500 filter drop-shadow-lg group-hover:text-emerald-400 transition" viewBox="0 0 100 100">
+                                        <path d="M50 10 C 20 10, 10 30, 10 50 C 10 70, 30 90, 50 90 C 70 90, 90 70, 90 50 C 90 30, 80 15, 60 12 C 55 11, 52 14, 50 10 Z" fill="currentColor"></path>
+                                        <circle cx="50" cy="50" r="38" fill="none" stroke="#047857" stroke-width="3" stroke-dasharray="4,6"></circle>
+                                    </svg>
+                                    <span class="absolute -top-1 -right-1 text-2xl filter drop-shadow">🌸</span>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span id="opt-3" class="font-playful text-3xl sm:text-4xl text-white font-black drop-shadow-[0_3px_3px_rgba(0,0,0,0.9)]">54</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Frog Character sitting on starting position -->
+                        <div id="frog-character" class="absolute left-1/2 bottom-3 transform -translate-x-1/2 w-24 h-24 z-20 frog-idle-anim pointer-events-none transition-all duration-300 ease-out">
+                            <!-- SVG Cute Cartoon Frog -->
+                            <svg class="w-full h-full drop-shadow-2xl" viewBox="0 0 100 100">
+                                <!-- Back legs -->
+                                <ellipse cx="20" cy="72" rx="15" ry="9" fill="#15803d" transform="rotate(-15 20 72)"></ellipse>
+                                <ellipse cx="80" cy="72" rx="15" ry="9" fill="#15803d" transform="rotate(15 80 72)"></ellipse>
+                                <circle cx="16" cy="74" r="6" fill="#166534"></circle>
+                                <circle cx="84" cy="74" r="6" fill="#166534"></circle>
+                                
+                                <!-- Main Body -->
+                                <ellipse cx="50" cy="65" rx="28" ry="22" fill="#22c55e"></ellipse>
+                                <!-- Belly -->
+                                <ellipse cx="50" cy="68" rx="20" ry="14" fill="#bbf7d0"></ellipse>
+                                
+                                <!-- Eyes structure -->
+                                <circle cx="33" cy="40" r="12" fill="#22c55e"></circle>
+                                <circle cx="33" cy="40" r="9" fill="#ffffff"></circle>
+                                <circle cx="34" cy="40" r="5" fill="#0f172a"></circle>
+                                <circle cx="36" cy="38" r="2" fill="#ffffff"></circle> <!-- Eye sparkle -->
+                                
+                                <circle cx="67" cy="40" r="12" fill="#22c55e"></circle>
+                                <circle cx="67" cy="40" r="9" fill="#ffffff"></circle>
+                                <circle cx="66" cy="40" r="5" fill="#0f172a"></circle>
+                                <circle cx="64" cy="38" r="2" fill="#ffffff"></circle> <!-- Eye sparkle -->
+
+                                <!-- Happy Pink Cheeks -->
+                                <circle cx="24" cy="56" r="5" fill="#f43f5e" opacity="0.65"></circle>
+                                <circle cx="76" cy="56" r="5" fill="#f43f5e" opacity="0.65"></circle>
+
+                                <!-- Big happy smile -->
+                                <path d="M38 58 Q50 68 62 58" stroke="#14532d" stroke-width="4.5" fill="none" stroke-linecap="round"></path>
+                                
+                                <!-- Front legs -->
+                                <ellipse cx="38" cy="77" rx="7" ry="11" fill="#16a34a"></ellipse>
+                                <ellipse cx="62" cy="77" rx="7" ry="11" fill="#16a34a"></ellipse>
+                            </svg>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+
+            <!-- SIDEBAR STATS PANEL (Included as sidebar on Desktop) -->
+            <aside id="sidebar-panel" class="hidden md:flex w-full md:w-64 bg-slate-950/85 border-t md:border-t-0 md:border-l border-emerald-800 p-5 flex-col justify-between z-20">
+                <!-- Status & Progress -->
+                <div class="space-y-6">
+                    <!-- Progress Card -->
+                    <div class="bg-slate-900/90 p-4 rounded-2xl border border-emerald-950 shadow-inner">
+                        <div class="flex justify-between text-xs text-slate-400 mb-1 font-bold">
+                            <span>KEMAJUAN</span>
+                            <span id="lbl-progress-side">1 / 20 Soal</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                            <div id="bar-progress-overall" class="bg-emerald-500 h-full transition-all duration-300" style="width: 5%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Level Panel -->
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-slate-400">Level:</span>
+                        <span id="lbl-level" class="px-3 py-1.5 bg-teal-800 text-teal-100 text-xs font-black rounded-full uppercase tracking-wider">Sedang</span>
+                    </div>
+
+                    <!-- Timer Count -->
+                    <div class="flex items-center justify-between bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl">⏳</span>
+                            <span class="text-sm font-semibold text-slate-300">Waktu</span>
+                        </div>
+                        <span id="lbl-timer" class="font-playful text-3xl text-yellow-400 font-extrabold tracking-wider">15s</span>
+                    </div>
+
+                    <!-- Lives Left (Hearts) -->
+                    <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 font-bold uppercase block mb-2">Nyawa Katak</span>
+                        <div id="lives-container" class="flex space-x-2 text-3xl justify-center filter drop-shadow">
+                            <span>❤️</span><span>❤️</span><span>❤️</span>
+                        </div>
+                    </div>
+
+                    <!-- Score Card -->
+                    <div class="bg-gradient-to-br from-emerald-900 to-teal-950 p-4 rounded-2xl border border-emerald-500/30 text-center shadow-lg">
+                        <span class="text-xs text-emerald-300 font-bold uppercase tracking-wider block mb-1">Skor Sekarang</span>
+                        <span id="lbl-score" class="font-playful text-4xl text-yellow-300 font-extrabold drop-shadow">0</span>
+                    </div>
+                </div>
+
+                <!-- Combo & Helper Info -->
+                <div class="mt-6 space-y-3">
+                    <!-- Combo Display -->
+                    <div id="combo-badge" class="hidden transform scale-95 opacity-0 transition-all duration-300 bg-gradient-to-r from-amber-500 to-red-600 p-2.5 rounded-xl text-center font-bold text-white shadow-md animate-pulse">
+                        🔥 COMBO <span id="lbl-combo-streak">5</span>x!
+                        <div class="text-[10px] text-yellow-100 font-normal mt-0.5">Bonus Poin Aktif!</div>
+                    </div>
+                    
+                    <div class="text-[11px] text-center text-slate-400 italic bg-slate-900/30 p-2.5 rounded-xl">
+                        TIPS: Tekan daun yang benar agar katak melompat gembira!
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MOBILE HUD PANELS (Synchronized alternative layout for small screens) -->
+            <div id="mobile-hud" class="md:hidden w-full bg-slate-950/90 border-t border-emerald-800 p-3 flex justify-between items-center z-20">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-semibold text-slate-400">Skor:</span>
+                    <span id="lbl-score-mob" class="font-playful text-2xl text-yellow-300 font-bold">0</span>
+                </div>
+                <div id="lives-container-mob" class="flex space-x-1 text-2xl">
+                    <span>❤️</span><span>❤️</span><span>❤️</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-xs text-slate-400">Waktu:</span>
+                    <span id="lbl-timer-mob" class="font-playful text-2xl text-yellow-400 font-bold">15s</span>
+                </div>
+                <div class="text-xs text-slate-300 bg-teal-800 px-3 py-1 rounded-full uppercase font-bold" id="lbl-level-mob">
+                    Sedang
+                </div>
+            </div>
+
+            <!-- START / MAIN MENU SCREEN -->
+            <div id="screen-menu" class="absolute inset-0 bg-gradient-to-br from-slate-950 via-teal-950 to-emerald-950 flex flex-col items-center justify-center p-6 z-30">
+                
+                <!-- Scenic Background Canvas Overlay inside Menu -->
+                <div class="absolute inset-0 opacity-15 pointer-events-none overflow-hidden">
+                    <div class="absolute w-[400px] h-[400px] bg-emerald-500/20 rounded-full filter blur-[120px] -top-20 -left-20"></div>
+                    <div class="absolute w-[400px] h-[400px] bg-teal-500/20 rounded-full filter blur-[120px] -bottom-20 -right-20"></div>
+                </div>
+
+                <!-- Big Logo / Mascot visual -->
+                <div class="mb-6 text-center transform hover:scale-105 transition duration-300 relative z-10">
+                    <div class="inline-block relative">
+                        <span class="text-8xl filter drop-shadow-2xl animate-bounce block">🐸</span>
+                        <span class="absolute -bottom-2 -right-2 text-4xl transform rotate-12">📝</span>
+                    </div>
+                    <h2 class="font-playful text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-300 to-yellow-300 drop-shadow-lg tracking-wide mt-3 font-black">
+                        Katak Pintar Berhitung
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base tracking-widest uppercase mt-2 font-semibold">
+                        Game Matematika Kreatif & Interaktif
+                    </p>
+                </div>
+
+                <!-- Selection Buttons -->
+                <div class="w-full max-w-sm flex flex-col space-y-4 z-10">
+                    <button id="btn-start-game" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-playful text-3xl font-extrabold rounded-2xl transform hover:scale-[1.03] active:scale-[0.98] transition duration-150 shadow-lg border-b-4 border-emerald-700 tracking-wider">
+                        MULAI BERMAIN (NORMAL)
+                    </button>
+
+                    <!-- NEW AI STORY MODE BUTTON -->
+                    <button id="btn-start-ai-story" class="w-full py-3.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-playful text-2xl font-extrabold rounded-2xl transform hover:scale-[1.03] active:scale-[0.98] transition duration-150 shadow-lg border-b-4 border-violet-800 tracking-wider flex items-center justify-center space-x-2">
+                        <span>✨</span> <span>TANTANGAN CERITA AI</span> <span>✨</span>
+                    </button>
+                    
+                    <button id="btn-select-level" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold rounded-xl transform hover:scale-[1.02] active:scale-95 transition duration-150 border border-emerald-800/50 flex items-center justify-center space-x-2">
+                        <span>⚙️</span> <span>Pilih Level:</span> <strong id="lbl-menu-level" class="text-white ml-1 uppercase">Sedang</strong>
+                    </button>
+                    
+                    <button id="btn-show-instructions" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transform hover:scale-[1.02] active:scale-95 transition duration-150 border border-slate-700 flex items-center justify-center space-x-2">
+                        <span>📖</span> <span>Petunjuk Permainan</span>
+                    </button>
+                </div>
+
+                <div class="mt-8 text-center text-xs text-slate-400 max-w-xs leading-relaxed">
+                    Mendukung **Generative Gemini AI** untuk petualangan edukatif yang selalu baru dan menyenangkan!
+                </div>
+            </div>
+
+            <!-- LEVEL SELECTION MODAL OVERLAY -->
+            <div id="screen-level" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 z-40">
+                <div class="w-full max-w-md bg-slate-900 border-2 border-emerald-500 p-6 rounded-3xl shadow-2xl relative">
+                    <button id="btn-close-level" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 transition">✕</button>
+                    
+                    <h3 class="font-playful text-3xl text-emerald-400 text-center mb-6">Pilih Tingkat Kesulitan</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Easy Level -->
+                        <button id="lvl-easy" class="w-full p-4 bg-emerald-950/50 hover:bg-emerald-900/60 border-2 border-emerald-700 rounded-2xl text-left transition duration-200 group flex items-center space-x-4">
+                            <span class="text-3xl">🌱</span>
+                            <div>
+                                <h4 class="font-bold text-white text-lg group-hover:text-emerald-300">MUDAH</h4>
+                                <p class="text-xs text-slate-400 mt-1">Perkalian angka 1-5 & pembagian sederhana yang mudah dipelajari.</p>
+                            </div>
+                        </button>
+                        
+                        <!-- Medium Level -->
+                        <button id="lvl-medium" class="w-full p-4 bg-teal-950/50 hover:bg-teal-900/60 border-2 border-teal-600 rounded-2xl text-left transition duration-200 group flex items-center space-x-4">
+                            <span class="text-3xl">🌿</span>
+                            <div>
+                                <h4 class="font-bold text-teal-300 text-lg group-hover:text-teal-200">SEDANG</h4>
+                                <p class="text-xs text-slate-400 mt-1">Perkalian dan pembagian dasar sampai dengan angka 10.</p>
+                            </div>
+                        </button>
+                        
+                        <!-- Hard Level -->
+                        <button id="lvl-hard" class="w-full p-4 bg-red-950/50 hover:bg-red-900/60 border-2 border-red-700 rounded-2xl text-left transition duration-200 group flex items-center space-x-4">
+                            <span class="text-3xl">🪵</span>
+                            <div>
+                                <h4 class="font-bold text-red-400 text-lg group-hover:text-red-300">SULIT</h4>
+                                <p class="text-xs text-slate-400 mt-1">Perkalian sampai 12 & pembagian dengan angka pembagi yang lebih besar.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSTRUCTIONS SCREEN -->
+            <div id="screen-instructions" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 z-40 overflow-y-auto">
+                <div class="w-full max-w-lg bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl relative">
+                    <button id="btn-close-instructions" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 transition">✕</button>
+                    
+                    <h3 class="font-playful text-3xl text-emerald-400 text-center mb-4">Petunjuk Permainan</h3>
+                    
+                    <div class="space-y-4 text-sm text-slate-300 leading-relaxed max-h-[350px] overflow-y-auto pr-2">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-xl mt-0.5">🎯</span>
+                            <div>
+                                <strong class="text-white block">Tujuan Utama</strong>
+                                Jawab setiap pertanyaan matematika dengan mengarahkan katak melompat ke daun teratai yang memiliki angka jawaban yang benar!
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <span class="text-xl mt-0.5">✨</span>
+                            <div>
+                                <strong class="text-white block">Tantangan Cerita AI (Gemini)</strong>
+                                Aktifkan mode cerita AI untuk menyelesaikan permasalahan berhitung seru tentang dunia katak yang disusun langsung oleh kecerdasan buatan Gemini!
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <span class="text-xl mt-0.5">⏱️</span>
+                            <div>
+                                <strong class="text-white block">Batasan Waktu</strong>
+                                Kamu memiliki waktu <span class="text-yellow-400 font-bold">15 detik</span> untuk setiap pertanyaan. Jika waktu habis, katak akan tercebur dan kehilangan 1 nyawa.
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <span class="text-xl mt-0.5">❤️</span>
+                            <div>
+                                <strong class="text-white block">Nyawa & Nilai</strong>
+                                Permainan dimulai dengan <span class="text-red-400 font-bold">3 Nyawa</span>. Menjawab dengan benar memberimu <span class="text-emerald-400 font-bold">+10 poin</span>. Menjawab salah tidak mengurangi skor tetapi mengurangi nyawa.
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <span class="text-xl mt-0.5">🔥</span>
+                            <div>
+                                <strong class="text-white block">Sistem Combo Beruntun</strong>
+                                Jawab benar secara berurutan tanpa salah sebanyak <span class="text-yellow-400 font-bold">5x, 10x, atau 15x</span> untuk mendapatkan bonus poin tambahan yang fantastis!
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btn-close-instructions-bottom" class="w-full mt-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold rounded-xl transition">
+                        SAYA MENGERTI
+                    </button>
+                </div>
+            </div>
+
+            <!-- GEMINI API SETTINGS DIALOG -->
+            <div id="screen-ai-settings" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 z-50">
+                <div class="w-full max-w-md bg-slate-900 border-2 border-violet-500 p-6 rounded-3xl shadow-2xl relative">
+                    <button id="btn-close-ai-settings" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 transition">✕</button>
+                    
+                    <h3 class="font-playful text-3xl text-violet-400 text-center mb-2">Konfigurasi Gemini AI</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Kosongkan kolom API Key jika ingin mengandalkan penataan sistem Canvas bawaan secara otomatis.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="inp-api-key" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Gemini API Key</label>
+                            <input id="inp-api-key" type="password" placeholder="Masukkan AI API Key Anda disini..." class="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-emerald-300 font-mono text-sm focus:outline-none focus:border-violet-500 placeholder-slate-700">
+                        </div>
+
+                        <div class="bg-violet-950/30 border border-violet-800/40 p-3.5 rounded-2xl text-xs text-violet-200 leading-relaxed space-y-2">
+                            <p><strong>💡 Mengapa menggunakan Gemini?</strong></p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Menciptakan variasi soal cerita yang tiada batas.</li>
+                                <li>Mendapatkan evaluasi langsung berupa penjelasan matematika ramah anak saat salah menjawab.</li>
+                            </ul>
+                        </div>
+                        
+                        <button id="btn-save-ai-settings" class="w-full py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold rounded-xl transition">
+                            SIMPAN KONFIGURASI
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GURU KATAK AI TUTOR DIALOG -->
+            <div id="screen-ai-tutor" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-50">
+                <div class="w-full max-w-lg bg-slate-900 border-4 border-violet-500 p-6 rounded-3xl shadow-2xl relative flex flex-col max-h-[90%] overflow-hidden">
+                    <button id="btn-close-ai-tutor" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl p-2 transition">✕</button>
+                    
+                    <!-- Character Header -->
+                    <div class="flex items-center space-x-4 border-b border-slate-800 pb-4 mb-4">
+                        <div class="w-16 h-16 bg-emerald-600/20 rounded-2xl p-2 flex items-center justify-center border-2 border-emerald-500">
+                            <span class="text-4xl">👨‍🏫</span>
+                        </div>
+                        <div>
+                            <h3 class="font-playful text-2xl text-yellow-400">Pojok Belajar Guru Katak AI</h3>
+                            <p class="text-xs text-slate-400">Penjelasan matematika interaktif ramah anak</p>
